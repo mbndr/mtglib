@@ -69,8 +69,8 @@ func insertHelvaultRecords(records []*HelvaultRecord) error {
 	return tx.Commit()
 }
 
-// LoadHelvault imports a csv into the database
-func LoadHelvault(r io.Reader) error {
+// ImportHelvault imports a csv into the database
+func ImportHelvault(r io.Reader) error {
 	err := truncateTable("helvault_library")
 	if err != nil {
 		return err

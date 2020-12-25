@@ -12,25 +12,19 @@ import (
 	"github.com/mbndr/mtglib"
 )
 
+var cards map[string]*mtglib.Card
+
 // TODO: HERE: interface idea, import scryfall data
 // für leichten import: Keine direkten Fremdschlüssel, sondern scryfall_id, dann kann geschaut werden, ob karte vorhanden.
 //   zb Kartensuche: Dann zeichen ob schon in sammlung
 //   gut, weil helvault csv kann ohne probleme gelöscht und wieder importiert werden (loose coupling)
 // Für Bilder: bei aufruf (/image/card/{scryfallId}) schauen ob schon heruntergeladen, ansonsten runterladen und dann anzeigen (TEST!)
 
-// Card get from db, for general use (joined data)
-type Card struct {
-	ScryfallID  string
-	ScryfallURI string
-	Languages   []string
-	Colors      []rune
-	Sets        []string
-	// ...??
-}
-
 func main() {
 	importType := flag.String("import", "", "What kind of file to import")
 	importFile := flag.String("file", "", "File to import to database")
+
+	serverPort := flag.String("port", ":8080", "Port the server listens on")
 
 	flag.Parse()
 
@@ -44,7 +38,20 @@ func main() {
 		return
 	}
 
-	fmt.Println("serve")
+	startServer(*serverPort)
+}
+
+func startServer(port string) {
+	// load all cards
+	cards, err := mtglib.LoadCards()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Loaded %d cards\n", len(cards))
+
+	log.Println("Starting server listening on " + port)
+	// TODO
 }
 
 func loadFile(typ string, path string) error {
@@ -58,9 +65,9 @@ func loadFile(typ string, path string) error {
 	}
 
 	if typ == "scryfall" {
-		return mtglib.LoadScryfall(r)
+		return mtglib.ImportScryfall(r)
 	} else if typ == "helvault" {
-		return mtglib.LoadHelvault(r)
+		return mtglib.ImportHelvault(r)
 	}
 
 	return errors.New("invalid import type")

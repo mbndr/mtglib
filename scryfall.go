@@ -98,8 +98,8 @@ func insertScryfallRecords(records []*ScryfallCard) error {
 	return tx.Commit()
 }
 
-// LoadScryfall imports the Scryfall bulk data into the database
-func LoadScryfall(r io.Reader) error {
+// ImportScryfall imports the Scryfall bulk data into the database
+func ImportScryfall(r io.Reader) error {
 	err := truncateTable("scryfall_cards")
 	if err != nil {
 		return err
