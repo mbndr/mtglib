@@ -17,3 +17,9 @@ CREATE TABLE IF NOT EXISTS scryfall_cards (
 	set_code VARCHAR(10) NOT NULL,
 	set_name VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS scryfall_symbols (
+	symbol VARCHAR(64) PRIMARY KEY,
+	svg_uri VARCHAR(255) NOT NULL,
+	title VARCHAR(255)
+);

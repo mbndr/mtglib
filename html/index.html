@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mtglib</title>
+    <link rel="stylesheet" href="/static/css/simple-grid.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <span class="ml-badge">{{ .Handler.DistinctCardCount }} unique cards</span>
+        <span class="ml-badge">{{ .Handler.TotalCardCount }} cards total</span>
+    </header>
+
+    <div class="ml-filter">
+        Colors:
+    </div>
+
+    <div class="ml-container">
+        <div class="row">
+            {{ range .ShownOracleIDs }}
+                {{ $card := $.GetCard . }}
+                <div class="col-4 ml-card">
+                    <img width="200" src="{{ $.CardURL . }}" />
+                </div>
+            {{ end }}
+        </div>
+        
+    </div>
+
+</body>
+</html>

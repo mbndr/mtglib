@@ -21,13 +21,29 @@ type Card struct {
 	Quantity      int
 }
 
-// LoadCards returns an map with the form oracle_id -> card
-func LoadCards() (map[string]*Card, error) {
+func getTotalCardCount() int {
+	rows, err := db.Query(SQLCountAllCards)
+	if err != nil {
+		return -1
+	}
+
+	var count int = -1
+
+	if rows.Next() {
+		rows.Scan(&count)
+	}
+
+	return count
+}
+
+// LoadCards returns an map with the form oracle_id -> card and a slice with all oracle IDs
+func LoadCards() (map[string]*Card, []string, error) {
 	cards := make(map[string]*Card)
+	oracleIDs := []string{}
 
 	rows, err := db.Query(SQLDistinctCards)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for rows.Next() {
@@ -53,14 +69,15 @@ func LoadCards() (map[string]*Card, error) {
 			&c.Quantity,
 		)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		c.Colors = strings.Split(colorsStr, "|")
 		c.ColorIdentity = strings.Split(colorIdentityStr, "|")
 
 		cards[c.OracleID] = c
+		oracleIDs = append(oracleIDs, c.OracleID)
 	}
 
-	return cards, nil
+	return cards, oracleIDs, nil
 }

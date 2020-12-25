@@ -12,14 +12,6 @@ import (
 	"github.com/mbndr/mtglib"
 )
 
-var cards map[string]*mtglib.Card
-
-// TODO: HERE: interface idea, import scryfall data
-// für leichten import: Keine direkten Fremdschlüssel, sondern scryfall_id, dann kann geschaut werden, ob karte vorhanden.
-//   zb Kartensuche: Dann zeichen ob schon in sammlung
-//   gut, weil helvault csv kann ohne probleme gelöscht und wieder importiert werden (loose coupling)
-// Für Bilder: bei aufruf (/image/card/{scryfallId}) schauen ob schon heruntergeladen, ansonsten runterladen und dann anzeigen (TEST!)
-
 func main() {
 	importType := flag.String("import", "", "What kind of file to import")
 	importFile := flag.String("file", "", "File to import to database")
@@ -28,7 +20,7 @@ func main() {
 
 	flag.Parse()
 
-	if *importType != "" && *importFile != "" {
+	if *importType != "" {
 		log.Printf("Imporing %s (%s)", *importFile, *importType)
 		err := loadFile(*importType, *importFile)
 		if err != nil {
@@ -38,23 +30,22 @@ func main() {
 		return
 	}
 
-	startServer(*serverPort)
-}
-
-func startServer(port string) {
-	// load all cards
-	cards, err := mtglib.LoadCards()
+	log.Println("Server listening on " + *serverPort)
+	err := mtglib.StartServer(*serverPort)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Printf("Loaded %d cards\n", len(cards))
-
-	log.Println("Starting server listening on " + port)
-	// TODO
 }
 
 func loadFile(typ string, path string) error {
+	if typ == "meta" {
+		return mtglib.ImportMeta()
+	}
+
+	if path == "" {
+		return errors.New("no import path given")
+	}
+
 	r, err := os.Open(path)
 	if err != nil {
 		return err
@@ -64,13 +55,13 @@ func loadFile(typ string, path string) error {
 		return errors.New("import canceled by user")
 	}
 
-	if typ == "scryfall" {
+	if typ == "scryfall" && path != "" {
 		return mtglib.ImportScryfall(r)
-	} else if typ == "helvault" {
+	} else if typ == "helvault" && path != "" {
 		return mtglib.ImportHelvault(r)
 	}
 
-	return errors.New("invalid import type")
+	return errors.New("invalid/missing import arguments")
 }
 
 func confirmPrompt(text string) bool {

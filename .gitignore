@@ -1,3 +1,7 @@
 data/*
 !data/.gitkeep
+
+resources/*
+!resources/.gitkeep
+
 mtglib
