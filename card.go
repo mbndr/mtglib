@@ -1,8 +1,29 @@
 package mtglib
 
 import (
+	"database/sql"
 	"strings"
+
+	"github.com/mbndr/mtglib/db"
 )
+
+const sqlStmtDistinctCards = `SELECT s.scryfall_id,
+								s.oracle_id,
+								s.name,
+								s.image_uri,
+								s.mana_cost,
+								s.cmc,
+								s.type_line,
+								s.oracle_text,
+								s.colors,
+								s.color_identity,
+								s.set_code,
+								s.set_name,
+								SUM(h.quantity)
+							FROM helvault_library h
+								INNER JOIN scryfall_cards s
+								ON s.scryfall_id = h.scryfall_id
+							GROUP BY oracle_id`
 
 // Card get from db, for general use (joined data)
 type Card struct {
@@ -21,33 +42,26 @@ type Card struct {
 	Quantity      int
 }
 
-func getTotalCardCount() int {
-	rows, err := db.Query(SQLCountAllCards)
+// TotalLibraryCardCount returns the total amount of cards in collection
+func TotalLibraryCardCount() int {
+	var count int
+	err := db.Select("SELECT SUM(quantity) FROM helvault_library", func(rows *sql.Rows) error {
+		return rows.Scan(&count)
+	})
 	if err != nil {
-		return -1
-	}
-
-	var count int = -1
-
-	if rows.Next() {
-		rows.Scan(&count)
+		count = -1
 	}
 
 	return count
 }
 
 // LoadCards returns an map with the form oracle_id -> card and a slice with all oracle IDs
-func LoadCards() (map[string]*Card, []string, error) {
-	cards := make(map[string]*Card)
+func LoadCards() (map[string]Card, []string, error) {
+	cards := make(map[string]Card)
 	oracleIDs := []string{}
 
-	rows, err := db.Query(SQLDistinctCards)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	for rows.Next() {
-		c := &Card{}
+	err := db.Select(sqlStmtDistinctCards, func(rows *sql.Rows) error {
+		var c Card
 
 		// special treatment
 		var colorsStr string
@@ -68,15 +82,18 @@ func LoadCards() (map[string]*Card, []string, error) {
 			&c.SetName,
 			&c.Quantity,
 		)
-		if err != nil {
-			return nil, nil, err
+		if err == nil {
+			c.Colors = strings.Split(colorsStr, "|")
+			c.ColorIdentity = strings.Split(colorIdentityStr, "|")
+
+			cards[c.OracleID] = c
+			oracleIDs = append(oracleIDs, c.OracleID)
 		}
 
-		c.Colors = strings.Split(colorsStr, "|")
-		c.ColorIdentity = strings.Split(colorIdentityStr, "|")
-
-		cards[c.OracleID] = c
-		oracleIDs = append(oracleIDs, c.OracleID)
+		return err
+	})
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return cards, oracleIDs, nil

@@ -2,83 +2,99 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
-	"github.com/mbndr/mtglib"
+	"github.com/mbndr/logo"
+	"github.com/mbndr/mtglib/db"
+	"github.com/mbndr/mtglib/helvault"
+	"github.com/mbndr/mtglib/scryfall"
+	"github.com/mbndr/mtglib/web"
+)
+
+var (
+	logger = logo.NewSimpleLogger(os.Stderr, logo.INFO, "MTGLIB ", true)
+
+	actionServe  bool
+	actionImport bool
+	helvaultFile string
+
+	serveAddr string
 )
 
 func main() {
-	importType := flag.String("import", "", "What kind of file to import")
-	importFile := flag.String("file", "", "File to import to database")
-
-	serverPort := flag.String("port", ":8080", "Port the server listens on")
-
+	flag.BoolVar(&actionServe, "serve", false, "Start the webserver")
+	flag.StringVar(&serveAddr, "addr", ":8080", "Adress of the webserver")
+	flag.BoolVar(&actionImport, "import", false, "(Re)import scryfall data")
+	flag.StringVar(&helvaultFile, "helvault", "", "(Re)import helvault library data from csv")
 	flag.Parse()
 
-	if *importType != "" {
-		log.Printf("Imporing %s (%s)", *importFile, *importType)
-		err := loadFile(*importType, *importFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("Successfully imported %s (%s)", *importFile, *importType)
-		return
+	var err error
+
+	err = db.Open("data/library.db")
+	if err != nil {
+		logger.Fatal("Cannot open database: ", err)
 	}
 
-	log.Println("Server listening on " + *serverPort)
-	err := mtglib.StartServer(*serverPort)
-	if err != nil {
-		log.Fatal(err)
+	// Do the action
+	if actionImport {
+		confirmPrompt("Scryfall import can take a while and will erase all already imported 'Magic: The Gathering' data.\nProceed?")
+		err = importScryfall()
+	} else if helvaultFile != "" {
+		confirmPrompt("Helvault import will erase all already imported library data.\nProceed?")
+		err = helvault.Import(helvaultFile)
+	} else if actionServe {
+		logger.Info("Starting server listening on ", serveAddr)
+		err = web.Serve(serveAddr)
+	} else {
+		logger.Warn("Invalid call")
+		flag.Usage()
+		os.Exit(1)
 	}
+
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	logger.Info("Action ended successfully")
 }
 
-func loadFile(typ string, path string) error {
-	if typ == "meta" {
-		return mtglib.ImportMeta()
-	}
+// run all scryfall imports and log partly progress
+func importScryfall() error {
+	var err error
 
-	if path == "" {
-		return errors.New("no import path given")
-	}
-
-	r, err := os.Open(path)
-	if err != nil {
+	logger.Info("Importing cards")
+	if err = scryfall.ImportCards(); err != nil {
 		return err
 	}
+	logger.Info("Success")
 
-	if !confirmPrompt(fmt.Sprintf("This will erase all %s data. Go on?", typ)) {
-		return errors.New("import canceled by user")
+	logger.Info("Importing symbols")
+	if err = scryfall.ImportSymbols(); err != nil {
+		return err
 	}
+	logger.Info("Success")
 
-	if typ == "scryfall" && path != "" {
-		return mtglib.ImportScryfall(r)
-	} else if typ == "helvault" && path != "" {
-		return mtglib.ImportHelvault(r)
-	}
-
-	return errors.New("invalid/missing import arguments")
+	return nil
 }
 
-func confirmPrompt(text string) bool {
+func confirmPrompt(text string) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("%s [y/n]: ", text)
 
 	answer, err := reader.ReadString('\n')
 	if err != nil {
-		return false
+		logger.Info("Cannot read user input")
+		os.Exit(1)
 	}
 
 	answer = strings.ToLower(strings.TrimSpace(answer))
 
-	if answer == "y" || answer == "yes" {
-		return true
+	if !(answer == "y" || answer == "yes") {
+		logger.Info("Canceled by user")
+		os.Exit(1)
 	}
-
-	return false
 }
