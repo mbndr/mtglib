@@ -8,6 +8,7 @@ import (
 )
 
 // Serve starts the http server
+// TODO: cleanup
 func Serve(port string) error {
 	// load all cards
 	cards, oracleIDs, err := mtglib.LoadCards()
@@ -15,12 +16,18 @@ func Serve(port string) error {
 		return err
 	}
 
+	symbolList, err := mtglib.LoadSymbols()
+	if err != nil {
+		return err
+	}
+
+	// index page
 	tpl, err := template.ParseFiles("html/index.html")
 	if err != nil {
 		return err
 	}
 
-	handler := &indexHandler{
+	index := &indexHandler{
 		DistinctCardCount: len(cards),
 		TotalCardCount:    mtglib.TotalLibraryCardCount(),
 		cards:             cards,
@@ -28,10 +35,23 @@ func Serve(port string) error {
 		tpl:               tpl,
 	}
 
+	// detail page
+	tpl, err = template.ParseFiles("html/detail.html")
+	if err != nil {
+		return err
+	}
+
+	detail := &detailHandler{
+		cards:   cards,
+		symbols: symbolList, // TODO: use custom symbolcollection
+		tpl:     tpl,
+	}
+
 	// setting up webserver
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	http.Handle("/", handler)
+	http.Handle("/detail/", detail)
+	http.Handle("/", index)
 
 	return http.ListenAndServe(port, nil)
 }

@@ -65,11 +65,11 @@ func main() {
 func importScryfall() error {
 	var err error
 
-	logger.Info("Importing cards")
+	/*logger.Info("Importing cards")
 	if err = scryfall.ImportCards(); err != nil {
 		return err
 	}
-	logger.Info("Success")
+	logger.Info("Success")*/
 
 	logger.Info("Importing symbols")
 	if err = scryfall.ImportSymbols(); err != nil {

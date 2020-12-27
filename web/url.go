@@ -11,23 +11,12 @@ import (
 	"github.com/mbndr/mtglib"
 )
 
-const card404 = "/static/img/card_404.jpg"
+// TODO: to scryfall package
 
-// ViewVars changes for each request and is given to the template.
-type ViewVars struct {
-	Handler        *indexHandler
-	ShownOracleIDs []string
-}
-
-// GetCard returns a Card object for an oracleID.
-func (v *ViewVars) GetCard(oracleID string) mtglib.Card {
-	return v.Handler.cards[oracleID]
-}
-
-// CardURL returns the link to the cards image.
+// Get the url of an card image.
 // Downloads the image if not already done.
-func (v *ViewVars) CardURL(oracleID string) string {
-	card, ok := v.Handler.cards[oracleID]
+func cardURL(oracleID string, cards map[string]mtglib.Card) string {
+	card, ok := cards[oracleID]
 	if !ok {
 		return card404
 	}
@@ -51,5 +40,5 @@ func (v *ViewVars) CardURL(oracleID string) string {
 		}
 	}
 
-	return imgPath
+	return fmt.Sprintf("/resources/%s.jpg", oracleID)
 }

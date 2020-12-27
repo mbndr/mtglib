@@ -9,8 +9,7 @@
 </head>
 <body>
     <header>
-        <span class="ml-badge">{{ .Handler.DistinctCardCount }} unique cards</span>
-        <span class="ml-badge">{{ .Handler.TotalCardCount }} cards total</span>
+        <img src="/static/img/mtglib.png" />
     </header>
 
     <div class="ml-filter">
@@ -22,12 +21,19 @@
             {{ range .ShownOracleIDs }}
                 {{ $card := $.GetCard . }}
                 <div class="col-4 ml-card">
-                    <img width="200" src="{{ $.CardURL . }}" />
+                    <a href="/detail/{{ $card.OracleID }}">
+                        <img src="{{ $.CardURL . }}" />
+                    </a>
                 </div>
             {{ end }}
         </div>
         
     </div>
+
+    <footer>
+        <span class="ml-badge">{{ .Handler.DistinctCardCount }} unique cards</span>
+        <span class="ml-badge">{{ .Handler.TotalCardCount }} cards total</span>
+    </footer>
 
 </body>
 </html>

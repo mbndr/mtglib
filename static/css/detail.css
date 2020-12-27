@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    text-align: center;
+    color: #333;
+}
+
+.ml-name {
+    font-size: 2em;
+    font-family: 'Sorts Mill Goudy', serif;
+    display: block;
+    padding: 5px;
+    border-bottom: solid 1px #333;
+    margin-bottom: 10px;
+}
+
+.ml-image {
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+}

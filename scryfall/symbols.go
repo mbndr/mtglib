@@ -3,7 +3,10 @@ package scryfall
 import (
 	"database/sql"
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
+	"path"
 
 	"github.com/mbndr/mtglib/db"
 	"github.com/pkg/errors"
@@ -13,7 +16,7 @@ const (
 	APISymbols = "https://api.scryfall.com/symbology"
 )
 
-type symbol struct {
+type Symbol struct {
 	Symbol string `json:"symbol"`
 	SvgURI string `json:"svg_uri"`
 	Title  string `json:"english"`
@@ -21,7 +24,7 @@ type symbol struct {
 
 type symbolList struct {
 	// Not checking if the list is multi page!
-	Data []symbol `json:"data"`
+	Data []Symbol `json:"data"`
 }
 
 // ImportSymbols imports all card symbols
@@ -48,5 +51,29 @@ func ImportSymbols() error {
 		return stmt.Exec(list.Data[i].Symbol, list.Data[i].SvgURI, list.Data[i].Title)
 	})
 
-	return err
+	return downloadSymbols(list)
+}
+
+func downloadSymbols(list symbolList) error {
+	// Download
+	for _, sym := range list.Data {
+		res, err := http.Get(sym.SvgURI)
+		if err != nil {
+			return errors.Wrap(err, "Cannot download symbol image")
+		}
+		defer res.Body.Close()
+
+		file, err := os.OpenFile(path.Join("resources", path.Base(sym.SvgURI)), os.O_CREATE|os.O_RDWR, 0755)
+		if err != nil {
+			return errors.Wrap(err, "Cannot create symbol file")
+		}
+		defer file.Close()
+
+		_, err = io.Copy(file, res.Body)
+		if err != nil {
+			return errors.Wrap(err, "Cannot copy symbol")
+		}
+	}
+
+	return nil
 }
