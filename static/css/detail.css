@@ -1,20 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy&display=swap');
-
 * {
     margin: 0;
     padding: 0;
 }
 
 body {
+    font-family: serif;
     text-align: center;
     color: #333;
 }
 
+.ml-oracle-text > p {
+    padding: 4px 20px;
+}
+
+.ml-container {
+    margin: 10px auto;
+    max-width: 500px;
+}
+
+.ml-card-table {
+    width: 95%;
+    margin: 10px auto;
+}
+
+.ml-card-table tbody tr td {
+    border-bottom: solid 1px #b3b3b3;
+    padding: 5px 0;
+}
+
+.ml-card-table tbody tr:last-child td {
+    border: none;
+}
+
+.ml-card-table tbody tr td:first-child {
+    width: 40%;
+    text-align: left;
+}
+
+.ml-card-table tbody tr td:last-child:not(.ml-oracle-text) {
+    text-align: right;
+}
+
+.ml-card-row {
+    border-bottom: solid 1px rgb(179, 179, 179);
+    margin-bottom: 3px;
+    text-align: left;
+}
+
+[class~='ml-card-row']:last-of-type {
+    border: none;
+    margin-bottom: 10px;
+}
+
 .ml-name {
     font-size: 2em;
-    font-family: 'Sorts Mill Goudy', serif;
     display: block;
-    padding: 5px;
+    padding: 0 5px 10px 5px;
     border-bottom: solid 1px #333;
     margin-bottom: 10px;
 }
@@ -23,4 +64,9 @@ body {
     width: 90%;
     max-width: 400px;
     height: auto;
+}
+
+.ml-symbol {
+    height: 15px;
+    width: auto;
 }

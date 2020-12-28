@@ -4,15 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .Card.Name }}</title>
+    <link rel="stylesheet" href="/static/css/simple-grid.css">
     <link rel="stylesheet" href="/static/css/detail.css">
 </head>
 <body>
-    <span class="ml-name">{{ .Card.Name }}</span>
-    <img class="ml-image" src="{{ .CardURL .Card.OracleID }}" />
-    <p>
-        {{ range .ManaSymbols .Card.ManaCost }}
-            {{ . }}
+    {{ if .Card.CardFaces }}
+        THIS IS A MULTIFACE CARD
+        {{ range .Card.CardFaces }}
+            <p>
+                {{ .Name }} - 
+                {{ $.ManaSymbols .ManaCost }}
+            </p>
         {{ end }}
-    </p>
+    {{ end }}
+
+    <div class="ml-container">
+
+        <span class="ml-name">{{ .Card.Name }}</span>
+
+        <table class="ml-card-table">
+            <tr>
+                <td>Mana cost</td>
+                <td>{{ .ManaSymbols .Card.ManaCost }}</td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td>{{ .Card.TypeLine }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="ml-oracle-text">{{ .ParseOracleText .Card.OracleText }}</td>
+            </tr>
+        </table>
+
+        <img class="ml-image" src="{{ .CardURL .Card.OracleID }}" />
+
+    </div>
+    
+
 </body>
 </html>

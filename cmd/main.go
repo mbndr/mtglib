@@ -24,6 +24,7 @@ var (
 	serveAddr string
 )
 
+// TODO: panic when no helvault library imported
 func main() {
 	flag.BoolVar(&actionServe, "serve", false, "Start the webserver")
 	flag.StringVar(&serveAddr, "addr", ":8080", "Adress of the webserver")
@@ -65,11 +66,11 @@ func main() {
 func importScryfall() error {
 	var err error
 
-	/*logger.Info("Importing cards")
+	logger.Info("Importing cards")
 	if err = scryfall.ImportCards(); err != nil {
 		return err
 	}
-	logger.Info("Success")*/
+	logger.Info("Success")
 
 	logger.Info("Importing symbols")
 	if err = scryfall.ImportSymbols(); err != nil {

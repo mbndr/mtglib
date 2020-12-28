@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/mbndr/mtglib"
-	"github.com/mbndr/mtglib/scryfall"
 )
 
 type detailVars struct {
@@ -20,14 +19,19 @@ func (v *detailVars) CardURL(oracleID string) string {
 	return cardURL(oracleID, v.Handler.cards)
 }
 
-func (v *detailVars) ManaSymbols(symbols string) []template.HTML {
-	return mtglib.SymbolToHTMLImage(symbols, v.Handler.symbols)
+func (v *detailVars) ManaSymbols(symbols string) template.HTML {
+	return v.Handler.symbols.HTMLImages(symbols)
+}
+
+// Parse symbols in text and structure it with paragraphs
+func (v *detailVars) ParseOracleText(oracleText string) template.HTML {
+	return v.Handler.symbols.ParseInText(oracleText)
 }
 
 // IndexHandler wraps the data for the default http handler (only global data which does not change)
 type detailHandler struct {
 	cards   map[string]mtglib.Card
-	symbols []scryfall.Symbol // TODO: this to symbol struct with method (toImg)
+	symbols mtglib.SymbolCollection
 	tpl     *template.Template
 }
 

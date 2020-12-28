@@ -40,6 +40,17 @@ type Card struct {
 	SetCode       string
 	SetName       string
 	Quantity      int
+	// When a card has multiple faces
+	CardFaces []CardFace
+}
+
+// CardFace represents a face of a multiface card
+type CardFace struct {
+	Colors   []string
+	ImageURI string
+	ManaCost string
+	Name     string
+	TypeLine string
 }
 
 // TotalLibraryCardCount returns the total amount of cards in collection
@@ -86,6 +97,12 @@ func LoadCards() (map[string]Card, []string, error) {
 			c.Colors = strings.Split(colorsStr, "|")
 			c.ColorIdentity = strings.Split(colorIdentityStr, "|")
 
+			cardFaces, err := loadCardFaces(c.ScryfallID)
+			if err != nil {
+				return err
+			}
+
+			c.CardFaces = cardFaces
 			cards[c.OracleID] = c
 			oracleIDs = append(oracleIDs, c.OracleID)
 		}
@@ -97,4 +114,25 @@ func LoadCards() (map[string]Card, []string, error) {
 	}
 
 	return cards, oracleIDs, nil
+}
+
+func loadCardFaces(scryfallID string) ([]CardFace, error) {
+	var cardFaces []CardFace
+
+	err := db.Select("SELECT colors, image_uri, mana_cost, name, type_line FROM scryfall_card_faces WHERE card_id = ?", func(rows *sql.Rows) error {
+		var cf CardFace
+		var colorsStr string
+		err := rows.Scan(
+			&colorsStr, &cf.ImageURI, &cf.ManaCost, &cf.Name, &cf.TypeLine,
+		)
+		cf.Colors = strings.Split(colorsStr, "|")
+		cardFaces = append(cardFaces, cf)
+		return err
+	}, scryfallID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return cardFaces, nil
 }

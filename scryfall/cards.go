@@ -21,7 +21,6 @@ type card struct {
 	ScryfallID    string            `json:"id"`
 	OracleID      string            `json:"oracle_id"`
 	Name          string            `json:"name"`
-	Lang          string            `json:"lang"`
 	ImageURIs     map[string]string `json:"image_uris"`
 	ManaCost      string            `json:"mana_cost"`
 	Cmc           float32           `json:"cmc"`
@@ -31,6 +30,16 @@ type card struct {
 	ColorIdentity []string          `json:"color_identity"`
 	Set           string            `json:"set"`
 	SetName       string            `json:"set_name"`
+	CardFaces     []cardFace        `json:"card_faces"'`
+}
+
+type cardFace struct {
+	CardID    string            `json:"-"` // must be set manually
+	Colors    []string          `json:"colors"`
+	ImageURIs map[string]string `json:"image_uris"`
+	ManaCost  string            `json:"mana_cost"`
+	Name      string            `json:"name"`
+	TypeLine  string            `json:"type_line"`
 }
 
 type bulkObject struct {
@@ -40,6 +49,10 @@ type bulkObject struct {
 // ImportCards imports all cards (bulk data).
 func ImportCards() error {
 	if _, err := db.ExecSingle("DELETE FROM scryfall_cards"); err != nil {
+		return errors.Wrap(err, "Cannot delete table")
+	}
+
+	if _, err := db.ExecSingle("DELETE FROM scryfall_card_faces"); err != nil {
 		return errors.Wrap(err, "Cannot delete table")
 	}
 
@@ -71,11 +84,13 @@ func importFromBulk(bulkURI string) error {
 		return errors.Wrap(err, "Cannot parse cards")
 	}
 
+	// collect card faces while inserting cards
+	var cardFaces []cardFace
+
 	_, err = db.Exec(`INSERT INTO scryfall_cards(
 		scryfall_id,
 		oracle_id,
 		name,
-		lang,
 		image_uri,
 		mana_cost,
 		cmc,
@@ -85,29 +100,57 @@ func importFromBulk(bulkURI string) error {
 		color_identity,
 		set_code,
 		set_name
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
 		rec := records[i]
 
-		imageURI := rec.ImageURIs["normal"]
-		colors := strings.Join(rec.Colors, "|")
-		colorIdentity := strings.Join(rec.ColorIdentity, "|")
+		for j := range rec.CardFaces {
+			rec.CardFaces[j].CardID = rec.ScryfallID
+		}
+		cardFaces = append(cardFaces, rec.CardFaces...)
 
 		return stmt.Exec(
 			rec.ScryfallID,
 			rec.OracleID,
 			rec.Name,
-			rec.Lang,
-			imageURI,
+			rec.ImageURIs["normal"],
 			rec.ManaCost,
 			rec.Cmc,
 			rec.TypeLine,
 			rec.OracleText,
-			colors,
-			colorIdentity,
+			colorsToString(rec.Colors),
+			colorsToString(rec.ColorIdentity),
 			rec.Set,
 			rec.SetName,
 		)
 	})
 
+	return importCardFaces(cardFaces)
+}
+
+func importCardFaces(cardFaces []cardFace) error {
+	_, err := db.Exec(`INSERT INTO scryfall_card_faces(
+		card_id,
+		colors,
+		image_uri,
+		mana_cost,
+		name,
+		type_line
+	) VALUES (?, ?, ?, ?, ?, ?)`, len(cardFaces), func(stmt *sql.Stmt, i int) (sql.Result, error) {
+		rec := cardFaces[i]
+
+		return stmt.Exec(
+			rec.CardID,
+			colorsToString(rec.Colors),
+			rec.ImageURIs["normal"],
+			rec.ManaCost,
+			rec.Name,
+			rec.TypeLine,
+		)
+	})
+
 	return err
+}
+
+func colorsToString(colors []string) string {
+	return strings.Join(colors, "|")
 }

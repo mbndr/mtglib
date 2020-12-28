@@ -44,7 +44,7 @@ func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *indexHandler) serveHTML(w http.ResponseWriter, r *http.Request) {
-	shownOracleIDs := h.oracleIDs[:30]
+	shownOracleIDs := h.oracleIDs[80:100]
 
 	h.tpl.Execute(w, &indexVars{
 		Handler:        h,

@@ -16,7 +16,7 @@ func Serve(port string) error {
 		return err
 	}
 
-	symbolList, err := mtglib.LoadSymbols()
+	symbols, err := mtglib.LoadSymbols()
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func Serve(port string) error {
 
 	detail := &detailHandler{
 		cards:   cards,
-		symbols: symbolList, // TODO: use custom symbolcollection
+		symbols: symbols,
 		tpl:     tpl,
 	}
 

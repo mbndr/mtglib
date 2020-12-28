@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/mbndr/mtglib"
 	"github.com/mbndr/mtglib/db"
 	"github.com/pkg/errors"
 )
@@ -16,15 +17,9 @@ const (
 	APISymbols = "https://api.scryfall.com/symbology"
 )
 
-type Symbol struct {
-	Symbol string `json:"symbol"`
-	SvgURI string `json:"svg_uri"`
-	Title  string `json:"english"`
-}
-
 type symbolList struct {
 	// Not checking if the list is multi page!
-	Data []Symbol `json:"data"`
+	Data []mtglib.Symbol `json:"data"`
 }
 
 // ImportSymbols imports all card symbols

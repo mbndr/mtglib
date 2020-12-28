@@ -11,11 +11,21 @@ CREATE TABLE IF NOT EXISTS scryfall_cards (
 	mana_cost VARCHAR(255),
 	cmc FLOAT NOT NULL,
 	type_line VARCHAR(255) NOT NULL,
-	oracle_text VARCHAR(512) NOT NULL,
-	colors VARCHAR(255) NOT NULL,
+	oracle_text VARCHAR(512),
+	colors VARCHAR(255),
 	color_identity VARCHAR(255) NOT NULL,
 	set_code VARCHAR(10) NOT NULL,
 	set_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS scryfall_card_faces (
+	card_id VARCHAR(255) NOT NULL,
+	colors VARCHAR(255),
+	image_uri VARCHAR(512),
+	mana_cost VARCHAR(255) NOT NULL,
+	name VARCHAR(255) NOT NULL,
+	type_line VARCHAR(255) NOT NULL,
+	FOREIGN KEY(card_id) REFERENCES scryfall_cards(scryfall_id)
 );
 
 CREATE TABLE IF NOT EXISTS scryfall_symbols (
