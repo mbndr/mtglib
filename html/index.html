@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mtglib</title>
     <link rel="stylesheet" href="/static/css/index.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark fixed-top" id="ml-navbar">
@@ -14,17 +14,17 @@
                 <img src="/static/img/mtglib.png" height="30" />
             </a>
             <form class="d-flex" method="get" action="">
-                <input name="search" value="{{ .SearchTerm }}" class="form-control me-2" id="ml-search" type="search" placeholder="Search card name (en)" aria-label="Search card name (en)">
-                <button class="btn btn-success" id="ml-search-button" type="submit">Search</button>
+                <input name="search" value="{{ .SearchTerm }}" class="form-control me-2" id="ml-search" type="search" placeholder="Quick search (card name)" aria-label="Search card name (en)">
+                <button class="btn ml-btn" type="submit">Search</button>
             </form>
         </div>
     </nav>
 
     <div class="container-fluid ml-container">
-        <form action="" method="get">
+        <form action="" method="get" class="form-inline">
             
             <div class="row" id="ml-filter-bar">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {{ if .Pagination.IsNecessary }}
                         <nav aria-label="Navigation">
                             <ul class="pagination pagination-sm">
@@ -52,13 +52,91 @@
                         </nav>
                     {{ end }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-2" style="">
+                    <div class="ml-count-badge">{{ .TotalResults }} / {{ .Handler.DistinctCardCount }}</div>
+                </div>
+                <div class="col-md-3" style="margin-bottom: 15px;">
                     <select class="form-select form-select-sm" name="sort" onchange="this.form.submit();">
-                        <option {{ if not .Sorting }}selected{{ end }}>Sort by...</option>
+                        <option {{ if not .Sorting }}selected{{ end }} value>Choose a sorting</option>
                         <option value="cmc" {{ if .SortingIs "cmc" }}selected{{ end }}>CMC</option>
                         <option value="type" {{ if .SortingIs "type" }}selected{{ end }}>Type</option>
                         <option value="name" {{ if .SortingIs "name" }}selected{{ end }}>Name</option>
                     </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-sm ml-btn" data-bs-target="#advancedSearch" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="advancedSearch">Advanced search</button>
+                </div>
+                <div class="col-md-12 collapse {{ if .QueryValueIs "as" "1" }}show{{ end }}" id="advancedSearch">
+                    <hr>
+                    <!-- Card name-->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="nameFilter" placeholder="Archangel of Thune" name="name" value="{{ .QueryValue "name" }}">
+                        <label for="nameFilter">Card name</label>
+                    </div>
+                    <!-- Rule text-->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="ruleFilter" placeholder="+1/+1 counter" name="rule" value="{{ .QueryValue "rule" }}">
+                        <label for="ruleFilter">Rule text</label>
+                    </div>
+                    <!-- Type-->
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="typeFilter" name="type" value="{{ .QueryValue "type" }}">
+                            <option {{ if .QueryValueIs "type" "" }}selected{{ end }} value>Choose a type</option>
+                            <option value="land" {{ if .QueryValueIs "type" "land" }}selected{{ end }}>Land</option>
+                            <option value="creature" {{ if .QueryValueIs "type" "creature" }}selected{{ end }}>Creature</option>
+                            <option value="artifact" {{ if .QueryValueIs "type" "artifact" }}selected{{ end }}>Artifact</option>
+                            <option value="enchantment" {{ if .QueryValueIs "type" "enchantment" }}selected{{ end }}>Enchantment</option>
+                            <option value="planeswalker" {{ if .QueryValueIs "type" "planeswalker" }}selected{{ end }}>Planeswalker</option>
+                            <option value="instant" {{ if .QueryValueIs "type" "instant" }}selected{{ end }}>Instant</option>
+                            <option value="sorcery" {{ if .QueryValueIs "type" "sorcery" }}selected{{ end }}>Sorcery</option>
+                        </select>
+                        <label for="typeFilter">Type</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="row">
+                                <label class="form-label ms-3 mb-3">Colors</label>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="R" id="colorRed" {{ if .QueryValueContains "colors" "R" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorRed">{{ .ManaSymbol 'R' }}</label>
+                                    </div>
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="G" id="colorGreen" {{ if .QueryValueContains "colors" "G" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorGreen">{{ .ManaSymbol 'G' }}</label>
+                                    </div>
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="U" id="colorBlue" {{ if .QueryValueContains "colors" "U" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorBlue">{{ .ManaSymbol 'U' }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="W" id="colorWhite" {{ if .QueryValueContains "colors" "W" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorWhite">{{ .ManaSymbol 'W' }}</label>
+                                    </div>
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="B" id="colorBlack" {{ if .QueryValueContains "colors" "B" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorBlack">{{ .ManaSymbol 'B' }}</label>
+                                    </div>
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="C" id="colorLess" {{ if .QueryValueContains "colors" "C" }}checked{{ end }}>
+                                        <label class="form-check-label" for="colorLess">{{ .ManaSymbol 'C' }}</label>
+                                    </div>
+                                    <div class="form-check form-switch ml-filter-cb">
+                                        <input class="form-check-input" type="checkbox" name="monocolorOnly" value="1" id="monocolorOnly" {{ if .QueryValueContains "monocolorOnly" "1" }}checked{{ end }}>
+                                        <label class="form-check-label" for="monocolorOnly">Monocolor only</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mt-3">
+                            <div class="d-grid">
+                                <button type="submit" name="as" value="1" class="btn btn-sm ml-btn">Search</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -84,10 +162,7 @@
         
     </div>
 
-    <footer>
-        <span class="ml-badge">{{ .Handler.DistinctCardCount }} unique cards</span>
-        <span class="ml-badge">{{ .Handler.TotalCardCount }} cards total</span>
-    </footer>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

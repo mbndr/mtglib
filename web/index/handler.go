@@ -15,6 +15,7 @@ type Handler struct {
 	cards             *mtglib.CardCollection
 	DistinctCardCount int
 	TotalCardCount    int // ALL cards (not only distinct)
+	symbols           mtglib.SymbolCollection
 	tpl               *template.Template
 }
 
@@ -24,6 +25,7 @@ func NewHandler(cards *mtglib.CardCollection, symbols mtglib.SymbolCollection, t
 		cards:             cards,
 		DistinctCardCount: cards.Count(),
 		TotalCardCount:    totalCardCount,
+		symbols:           symbols,
 	}
 }
 
@@ -69,20 +71,49 @@ func (h *Handler) serveHTML(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.tpl.Execute(w, &indexVars{
+		request:        r,
 		Handler:        h,
 		ShownOracleIDs: resultOracleIDs[offset:idRangeTo],
+		TotalResults:   len(resultOracleIDs),
 		SearchTerm:     r.FormValue("search"),
 		Pagination:     p,
 		Sorting:        s,
 	})
 }
 
+// TODO: shorter (custom constructors with request?)
 func buildFilters(r *http.Request) []filter.Filter {
 	var filters []filter.Filter
 
 	if r.FormValue("search") != "" {
 		filters = append(filters, &filter.NameFilter{
 			Name: r.FormValue("search"),
+		})
+		return filters // this is quick search
+	}
+
+	if r.FormValue("rule") != "" {
+		filters = append(filters, &filter.RuleFilter{
+			Text: r.FormValue("rule"),
+		})
+	}
+
+	if r.FormValue("name") != "" {
+		filters = append(filters, &filter.NameFilter{
+			Name: r.FormValue("name"),
+		})
+	}
+
+	if r.FormValue("type") != "" {
+		filters = append(filters, &filter.TypeFilter{
+			Type: r.FormValue("type"),
+		})
+	}
+
+	if len(r.URL.Query()["colors"]) != 0 || r.FormValue("monocolorOnly") == "1" {
+		filters = append(filters, &filter.ColorFilter{
+			Colors:        r.URL.Query()["colors"],
+			MonocolorOnly: r.FormValue("monocolorOnly") == "1",
 		})
 	}
 

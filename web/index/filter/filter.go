@@ -63,7 +63,7 @@ func buildSQLStatement(filters []Filter, sorter *sorting.Sorting) (string, []int
 	parameters = append(parameters)
 
 	if LogSQL {
-		fmt.Println(buf.String())
+		fmt.Printf("SQL: %s\nParameter: %+v\n", buf.String(), parameters)
 	}
 	return buf.String(), parameters
 }
