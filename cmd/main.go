@@ -12,6 +12,7 @@ import (
 	"github.com/mbndr/mtglib/helvault"
 	"github.com/mbndr/mtglib/scryfall"
 	"github.com/mbndr/mtglib/web"
+	"github.com/mbndr/mtglib/web/index/filter"
 )
 
 var (
@@ -30,6 +31,7 @@ func main() {
 	flag.StringVar(&serveAddr, "addr", ":8080", "Adress of the webserver")
 	flag.BoolVar(&actionImport, "import", false, "(Re)import scryfall data")
 	flag.StringVar(&helvaultFile, "helvault", "", "(Re)import helvault library data from csv")
+	flag.BoolVar(&filter.LogSQL, "sql", false, "Print the SQL Queries when getting the card list")
 	flag.Parse()
 
 	var err error

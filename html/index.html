@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark fixed-top ml-navbar">
+    <nav class="navbar navbar-dark bg-dark fixed-top" id="ml-navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
                 <img src="/static/img/mtglib.png" height="30" />
@@ -21,6 +21,51 @@
     </nav>
 
     <div class="container-fluid ml-container">
+        <form action="" method="get">
+            
+            <div class="row" id="ml-filter-bar">
+                <div class="col-md-6">
+                    {{ if .Pagination.IsNecessary }}
+                        <nav aria-label="Navigation">
+                            <ul class="pagination pagination-sm">
+                                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
+                                    <a class="page-link" href="{{ .Pagination.FirstPageURL }}">«</a>
+                                </li>
+                                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
+                                    <a class="page-link" href="{{ .Pagination.PreviousPageURL }}">‹</a>
+                                </li>
+                                <li class="ml-pagination-item page-item">
+                                    <select class="form-select" id="ml-pagination-select" onchange="location = this.value;">
+                                        {{ range .Pagination.PageList }}
+                                        <option value="{{ $.Pagination.PageURL . }}" {{ if eq $.Pagination.CurrentPage .}}selected{{ end }} >{{ . }}</option>
+                                        {{ end }}
+                                    </select>
+                                </li>
+                                <li id="ml-pagination-next" class="ml-pagination-item page-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
+                                    <a class="page-link" href="{{ .Pagination.NextPageURL }}">›</a>
+                                </li>
+                                <li class="page-item ml-pagination-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
+                                    <a class="page-link" href="{{ .Pagination.LastPageURL }}">»</a>
+                                </li>
+                                
+                            </ul>
+                        </nav>
+                    {{ end }}
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select form-select-sm" name="sort" onchange="this.form.submit();">
+                        <option {{ if not .Sorting }}selected{{ end }}>Sort by...</option>
+                        <option value="cmc" {{ if .SortingIs "cmc" }}selected{{ end }}>CMC</option>
+                        <option value="type" {{ if .SortingIs "type" }}selected{{ end }}>Type</option>
+                        <option value="name" {{ if .SortingIs "name" }}selected{{ end }}>Name</option>
+                    </select>
+                </div>
+            </div>
+            
+        </form>
+
+        <hr>
+
         <div class="row">
             {{ range .ShownOracleIDs }}
                 {{ $card := $.GetCard . }}
