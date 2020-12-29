@@ -3,19 +3,35 @@
     padding: 0;
 }
 
+#ml-back {
+    position: absolute;
+    top: 4px;
+    left: 0px;
+    font-size: 1.5em;
+    text-decoration: none;
+    color: #909090;
+}
+
 body {
     font-family: serif;
     text-align: center;
     color: #333;
 }
 
+.ml-oracle-text {
+    margin: 20px auto;
+    text-align: left;
+    width: 80%;
+}
+
 .ml-oracle-text > p {
-    padding: 4px 20px;
+    padding: 4px 0;
 }
 
 .ml-container {
     margin: 10px auto;
     max-width: 500px;
+    position: relative;
 }
 
 .ml-card-table {
@@ -37,7 +53,7 @@ body {
     text-align: left;
 }
 
-.ml-card-table tbody tr td:last-child:not(.ml-oracle-text) {
+.ml-card-table tbody tr td:last-child {
     text-align: right;
 }
 

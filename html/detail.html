@@ -20,7 +20,14 @@
 
     <div class="ml-container">
 
-        <span class="ml-name">{{ .Card.Name }}</span>
+        <a href="/" id="ml-back">❮</a>
+
+        <span class="ml-name">
+            {{ .Card.Name }}
+            {{ if ne .Card.Quantity 1 }}
+                <small>({{ .Card.Quantity }}x)</small>
+            {{ end }}
+        </span>
 
         <table class="ml-card-table">
             <tr>
@@ -32,11 +39,15 @@
                 <td>{{ .Card.TypeLine }}</td>
             </tr>
             <tr>
-                <td colspan="2" class="ml-oracle-text">{{ .ParseOracleText .Card.OracleText }}</td>
+                <td colspan="2">
+                    <div class="ml-oracle-text">
+                        {{ .ParseOracleText .Card.OracleText }}
+                    </div>
+                </td>
             </tr>
         </table>
 
-        <img class="ml-image" src="{{ .CardURL .Card.OracleID }}" />
+        <img class="ml-image" src="{{ .CardImageURL .Card.OracleID }}" />
 
     </div>
     

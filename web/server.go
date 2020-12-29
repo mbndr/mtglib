@@ -1,17 +1,17 @@
 package web
 
 import (
-	"html/template"
 	"net/http"
 
 	"github.com/mbndr/mtglib"
+	"github.com/mbndr/mtglib/web/detail"
+	"github.com/mbndr/mtglib/web/index"
 )
 
 // Serve starts the http server
-// TODO: cleanup
 func Serve(port string) error {
 	// load all cards
-	cards, oracleIDs, err := mtglib.LoadCards()
+	cards, err := mtglib.LoadCards()
 	if err != nil {
 		return err
 	}
@@ -21,37 +21,11 @@ func Serve(port string) error {
 		return err
 	}
 
-	// index page
-	tpl, err := template.ParseFiles("html/index.html")
-	if err != nil {
-		return err
-	}
-
-	index := &indexHandler{
-		DistinctCardCount: len(cards),
-		TotalCardCount:    mtglib.TotalLibraryCardCount(),
-		cards:             cards,
-		oracleIDs:         oracleIDs,
-		tpl:               tpl,
-	}
-
-	// detail page
-	tpl, err = template.ParseFiles("html/detail.html")
-	if err != nil {
-		return err
-	}
-
-	detail := &detailHandler{
-		cards:   cards,
-		symbols: symbols,
-		tpl:     tpl,
-	}
-
 	// setting up webserver
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("./resources"))))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	http.Handle("/detail/", detail)
-	http.Handle("/", index)
+	http.Handle("/detail/", detail.NewHandler(cards, symbols))
+	http.Handle("/", index.NewHandler(cards, symbols, mtglib.TotalLibraryCardCount()))
 
 	return http.ListenAndServe(port, nil)
 }

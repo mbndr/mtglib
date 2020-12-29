@@ -1,7 +1,13 @@
 package mtglib
 
 import (
+	"bytes"
 	"database/sql"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 	"strings"
 
 	"github.com/mbndr/mtglib/db"
@@ -66,9 +72,11 @@ func TotalLibraryCardCount() int {
 	return count
 }
 
-// LoadCards returns an map with the form oracle_id -> card and a slice with all oracle IDs
-func LoadCards() (map[string]Card, []string, error) {
-	cards := make(map[string]Card)
+// LoadCards returns all cards in the library loaded from db
+func LoadCards() (*CardCollection, error) {
+	var cc CardCollection
+	cc.cards = make(map[string]Card)
+
 	oracleIDs := []string{}
 
 	err := db.Select(sqlStmtDistinctCards, func(rows *sql.Rows) error {
@@ -103,17 +111,17 @@ func LoadCards() (map[string]Card, []string, error) {
 			}
 
 			c.CardFaces = cardFaces
-			cards[c.OracleID] = c
+			cc.cards[c.OracleID] = c
 			oracleIDs = append(oracleIDs, c.OracleID)
 		}
 
 		return err
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cards, oracleIDs, nil
+	return &cc, nil
 }
 
 func loadCardFaces(scryfallID string) ([]CardFace, error) {
@@ -135,4 +143,55 @@ func loadCardFaces(scryfallID string) ([]CardFace, error) {
 	}
 
 	return cardFaces, nil
+}
+
+// CardCollection wraps cards and helper methods
+type CardCollection struct {
+	cards map[string]Card // key: oracleID
+}
+
+// Get returns a card or nil
+func (cc *CardCollection) Get(oracleID string) *Card {
+	card, ok := cc.cards[oracleID]
+	if !ok {
+		return nil
+	}
+	return &card
+}
+
+// Count returns the count of cards
+func (cc *CardCollection) Count() int {
+	return len(cc.cards)
+}
+
+const card404 = "/static/img/card_404.jpg"
+
+// GetImageURL returns the local url of an card image.
+// Downloads the image if it doesn't exists.
+func (cc *CardCollection) GetImageURL(oracleID string) string {
+	card := cc.Get(oracleID)
+	if card == nil {
+		return card404
+	}
+
+	imgPath := fmt.Sprintf("./resources/%s.jpg", oracleID)
+
+	// Download file if it does not exist
+	if _, err := os.Stat(imgPath); err != nil {
+		res, err := http.Get(card.ImageURI)
+		if err != nil {
+			log.Println(err)
+			return card404
+		}
+		defer res.Body.Close()
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(res.Body)
+		err = ioutil.WriteFile(imgPath, buf.Bytes(), 0755)
+		if err != nil {
+			return card404
+		}
+	}
+
+	return fmt.Sprintf("/resources/%s.jpg", oracleID)
 }
