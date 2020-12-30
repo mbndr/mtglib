@@ -3,58 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Card.Name }}</title>
-    <link rel="stylesheet" href="/static/css/simple-grid.css">
+    <title>{{ .CardName .Card }}</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/shared.css">
     <link rel="stylesheet" href="/static/css/detail.css">
 </head>
 <body>
-    {{ if .Card.CardFaces }}
-        THIS IS A MULTIFACE CARD
-        {{ range .Card.CardFaces }}
-            <p>
-                {{ .Name }} - 
-                {{ $.ManaSymbols .ManaCost }}
-            </p>
-        {{ end }}
-    {{ end }}
+    <a href="javascript:history.back()" id="ml-back">❮</a>
+        
 
-    <div class="ml-container">
-
-        <a href="/" id="ml-back">❮</a>
-
-        <span class="ml-name">
-            {{ .Card.Name }}
+    <div class="container ml-container {{ if not .Card.CardFaces }}ml-container-small{{ end }}">
+        <h1 class="ml-name">
+            {{ .CardName .Card }}
             {{ if ne .Card.Quantity 1 }}
                 <small>({{ .Card.Quantity }}x)</small>
             {{ end }}
-        </span>
-
-        <table class="ml-card-table">
-            <tr>
-                <td>Mana cost</td>
-                <td>{{ .ManaSymbols .Card.ManaCost }}</td>
-            </tr>
-            <tr>
-                <td>Type</td>
-                <td>{{ .Card.TypeLine }}</td>
-            </tr>
-            <tr>
-                <td>Rarity</td>
-                <td>
-                    <span class="ml-rarity {{ .Card.Rarity }}">●</span>
-                    {{ .Card.Rarity }}
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <div class="ml-oracle-text">
-                        {{ .ParseOracleText .Card.OracleText }}
+        </h1>
+        
+        <div class="row">
+            {{ if .Card.CardFaces }}
+                <!-- Card basics -->
+                <div class="col-md-12">
+                    <table class="ml-card-table">
+                        <tr>
+                            <td>Colors</td>
+                            <td>{{ .ManaSymbolsArr .Card.Colors }}</td>
+                        </tr>
+                        <tr>
+                            <td>Color identity</td>
+                            <td>{{ .ManaSymbolsArr .Card.ColorIdentity }}</td>
+                        </tr>
+                        <tr>
+                            <td>Rarity</td>
+                            <td>
+                                <span class="ml-rarity {{ .Card.Rarity }}">●</span>
+                                {{ .Card.Rarity }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Faces -->
+                {{ $faceImageURIs := .FaceImageURLs .Card.OracleID }}
+                {{ range $i, $face := .Card.CardFaces }}
+                    <div class="col-md-6">
+                        <img class="img-fluid ml-card" src="{{ index $faceImageURIs $i }}" />
+                        <h2 class="ml-face-name">{{ $face.Name }}</h2>
+                        <table class="ml-card-table">
+                            <tr>
+                                <td>Mana cost</td>
+                                <td>{{ $.ManaSymbols $face.ManaCost }}</td>
+                            </tr>
+                            <tr>
+                                <td>Colors</td>
+                                <td>{{ $.ManaSymbolsArr $face.Colors }}</td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td>{{ $face.TypeLine }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="ml-oracle-text">
+                                        {{ $.ParseOracleText $face.OracleText }}
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                </td>
-            </tr>
-        </table>
-
-        <img class="ml-image" src="{{ .CardImageURL .Card.OracleID }}" />
+                {{ end }}
+            {{ else }}
+                <!-- Normal card -->
+                <div class="col-md-12">
+                    <table class="ml-card-table">
+                        <tr>
+                            <td>Colors</td>
+                            <td>{{ .ManaSymbolsArr .Card.Colors }}</td>
+                        </tr>
+                        <tr>
+                            <td>Color identity</td>
+                            <td>{{ .ManaSymbolsArr .Card.ColorIdentity }}</td>
+                        </tr>
+                        <tr>
+                            <td>Type</td>
+                            <td>{{ .Card.TypeLine }}</td>
+                        </tr>
+                        <tr>
+                            <td>Rarity</td>
+                            <td>
+                                <span class="ml-rarity {{ .Card.Rarity }}">●</span>
+                                {{ .Card.Rarity }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="ml-oracle-text">
+                                    {{ .ParseOracleText .Card.OracleText }}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <img class="img-fluid ml-card" src="{{ .CardImageURL .Card.OracleID }}" />
+                </div>
+            {{ end }}
+        </div>
 
     </div>
     

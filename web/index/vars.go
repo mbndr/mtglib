@@ -28,7 +28,11 @@ func (v *indexVars) GetCard(oracleID string) *mtglib.Card {
 
 // CardURL returns the link to the cards image.
 func (v *indexVars) CardURL(oracleID string) string {
-	return v.Handler.cards.GetImageURL(oracleID)
+	if card := v.Handler.cards.Get(oracleID); card != nil && len(card.CardFaces) > 0 {
+		return v.Handler.cards.FaceImageURLs(oracleID)[0]
+	}
+
+	return v.Handler.cards.CardImageURL(oracleID)
 }
 
 // CardURL returns the link to the cards image.

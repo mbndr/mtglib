@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS scryfall_cards (
 	oracle_text VARCHAR(512),
 	colors VARCHAR(255),
 	color_identity VARCHAR(255) NOT NULL,
-	set_code VARCHAR(10) NOT NULL,
-	set_name VARCHAR(255) NOT NULL,
 	rarity VARCHAR(20) NOT NULL
 );
 
@@ -26,6 +24,7 @@ CREATE TABLE IF NOT EXISTS scryfall_card_faces (
 	mana_cost VARCHAR(255) NOT NULL,
 	name VARCHAR(255) NOT NULL,
 	type_line VARCHAR(255) NOT NULL,
+	oracle_text VARCHAR(512),
 	FOREIGN KEY(card_id) REFERENCES scryfall_cards(scryfall_id)
 );
 

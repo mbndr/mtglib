@@ -30,7 +30,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var err error
 		h.tpl, err = template.ParseFiles("html/detail.html")
 		if err != nil {
-			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			http.Error(w, "500 internal server error\n"+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		h.serveHTML(w, r)

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -23,8 +22,6 @@ const sqlStmtDistinctCards = `SELECT s.scryfall_id,
 								s.oracle_text,
 								s.colors,
 								s.color_identity,
-								s.set_code,
-								s.set_name,
 								SUM(h.quantity),
 								s.rarity
 							FROM helvault_library h
@@ -44,8 +41,6 @@ type Card struct {
 	OracleText    string
 	Colors        []string
 	ColorIdentity []string
-	SetCode       string
-	SetName       string
 	Quantity      int
 	Rarity        string
 	// When a card has multiple faces
@@ -54,11 +49,12 @@ type Card struct {
 
 // CardFace represents a face of a multiface card
 type CardFace struct {
-	Colors   []string
-	ImageURI string
-	ManaCost string
-	Name     string
-	TypeLine string
+	Colors     []string
+	ImageURI   string
+	ManaCost   string
+	Name       string
+	TypeLine   string
+	OracleText string
 }
 
 // TotalLibraryCardCount returns the total amount of cards in collection
@@ -99,14 +95,12 @@ func LoadCards() (*CardCollection, error) {
 			&c.OracleText,
 			&colorsStr,
 			&colorIdentityStr,
-			&c.SetCode,
-			&c.SetName,
 			&c.Quantity,
 			&c.Rarity,
 		)
 		if err == nil {
-			c.Colors = strings.Split(colorsStr, "|")
-			c.ColorIdentity = strings.Split(colorIdentityStr, "|")
+			c.Colors = strToColorArr(colorsStr)
+			c.ColorIdentity = strToColorArr(colorIdentityStr)
 
 			cardFaces, err := loadCardFaces(c.ScryfallID)
 			if err != nil {
@@ -130,13 +124,15 @@ func LoadCards() (*CardCollection, error) {
 func loadCardFaces(scryfallID string) ([]CardFace, error) {
 	var cardFaces []CardFace
 
-	err := db.Select("SELECT colors, image_uri, mana_cost, name, type_line FROM scryfall_card_faces WHERE card_id = ?", func(rows *sql.Rows) error {
+	err := db.Select("SELECT colors, image_uri, mana_cost, name, type_line, oracle_text FROM scryfall_card_faces WHERE card_id = ?", func(rows *sql.Rows) error {
 		var cf CardFace
 		var colorsStr string
 		err := rows.Scan(
-			&colorsStr, &cf.ImageURI, &cf.ManaCost, &cf.Name, &cf.TypeLine,
+			&colorsStr, &cf.ImageURI, &cf.ManaCost, &cf.Name, &cf.TypeLine, &cf.OracleText,
 		)
-		cf.Colors = strings.Split(colorsStr, "|")
+
+		cf.Colors = strToColorArr(colorsStr)
+
 		cardFaces = append(cardFaces, cf)
 		return err
 	}, scryfallID)
@@ -146,6 +142,13 @@ func loadCardFaces(scryfallID string) ([]CardFace, error) {
 	}
 
 	return cardFaces, nil
+}
+
+func strToColorArr(s string) []string {
+	if s != "" {
+		return strings.Split(s, "|")
+	}
+	return []string{}
 }
 
 // CardCollection wraps cards and helper methods
@@ -169,9 +172,9 @@ func (cc *CardCollection) Count() int {
 
 const card404 = "/static/img/card_404.jpg"
 
-// GetImageURL returns the local url of an card image.
+// CardImageURL returns the local url of an card image.
 // Downloads the image if it doesn't exists.
-func (cc *CardCollection) GetImageURL(oracleID string) string {
+func (cc *CardCollection) CardImageURL(oracleID string) string {
 	card := cc.Get(oracleID)
 	if card == nil {
 		return card404
@@ -179,22 +182,61 @@ func (cc *CardCollection) GetImageURL(oracleID string) string {
 
 	imgPath := fmt.Sprintf("./resources/%s.jpg", oracleID)
 
-	// Download file if it does not exist
-	if _, err := os.Stat(imgPath); err != nil {
-		res, err := http.Get(card.ImageURI)
+	err := downloadImageIfNotExist(imgPath, card.ImageURI)
+	if err != nil {
+		return card404
+	}
+
+	return fmt.Sprintf("/resources/%s.jpg", oracleID)
+}
+
+// FaceImageURLs returns a list of card face images.
+// If the card itself has an image, use this instead.
+func (cc *CardCollection) FaceImageURLs(oracleID string) []string {
+	card := cc.Get(oracleID)
+	if card == nil {
+		return []string{card404}
+	}
+
+	uris := make([]string, len(card.CardFaces))
+
+	// if the parent card has an image, use this instead for each face
+	if card.ImageURI != "" {
+		for i := range uris {
+			uris[i] = cc.CardImageURL(card.OracleID)
+		}
+		return uris
+	}
+
+	// parent doesn't have an image, download own
+	for i, f := range card.CardFaces {
+		err := downloadImageIfNotExist(fmt.Sprintf("./resources/%s_%d.jpg", oracleID, i), f.ImageURI)
 		if err != nil {
-			log.Println(err)
-			return card404
+			uris[i] = card404
+			continue
+		}
+		uris[i] = fmt.Sprintf("/resources/%s_%d.jpg", oracleID, i)
+	}
+
+	return uris
+}
+
+func downloadImageIfNotExist(dstPath, srcURI string) error {
+	// Download file if it does not exist
+	if _, err := os.Stat(dstPath); err != nil {
+		res, err := http.Get(srcURI)
+		if err != nil {
+			return err
 		}
 		defer res.Body.Close()
 
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(res.Body)
-		err = ioutil.WriteFile(imgPath, buf.Bytes(), 0755)
+		err = ioutil.WriteFile(dstPath, buf.Bytes(), 0755)
 		if err != nil {
-			return card404
+			return err
 		}
 	}
 
-	return fmt.Sprintf("/resources/%s.jpg", oracleID)
+	return nil
 }

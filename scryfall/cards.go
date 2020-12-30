@@ -28,19 +28,18 @@ type card struct {
 	OracleText    string            `json:"oracle_text"`
 	Colors        []string          `json:"colors"`
 	ColorIdentity []string          `json:"color_identity"`
-	Set           string            `json:"set"`
-	SetName       string            `json:"set_name"`
 	CardFaces     []cardFace        `json:"card_faces"'`
 	Rarity        string            `json:"rarity"`
 }
 
 type cardFace struct {
-	CardID    string            `json:"-"` // must be set manually
-	Colors    []string          `json:"colors"`
-	ImageURIs map[string]string `json:"image_uris"`
-	ManaCost  string            `json:"mana_cost"`
-	Name      string            `json:"name"`
-	TypeLine  string            `json:"type_line"`
+	CardID     string            `json:"-"` // must be set manually
+	Colors     []string          `json:"colors"`
+	ImageURIs  map[string]string `json:"image_uris"`
+	ManaCost   string            `json:"mana_cost"`
+	Name       string            `json:"name"`
+	TypeLine   string            `json:"type_line"`
+	OracleText string            `json:"oracle_text"`
 }
 
 type bulkObject struct {
@@ -99,10 +98,8 @@ func importFromBulk(bulkURI string) error {
 		oracle_text,
 		colors,
 		color_identity,
-		set_code,
-		set_name,
 		rarity
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
 		rec := records[i]
 
 		for j := range rec.CardFaces {
@@ -121,8 +118,6 @@ func importFromBulk(bulkURI string) error {
 			rec.OracleText,
 			colorsToString(rec.Colors),
 			colorsToString(rec.ColorIdentity),
-			rec.Set,
-			rec.SetName,
 			rec.Rarity,
 		)
 	})
@@ -137,8 +132,9 @@ func importCardFaces(cardFaces []cardFace) error {
 		image_uri,
 		mana_cost,
 		name,
-		type_line
-	) VALUES (?, ?, ?, ?, ?, ?)`, len(cardFaces), func(stmt *sql.Stmt, i int) (sql.Result, error) {
+		type_line,
+		oracle_text
+	) VALUES (?, ?, ?, ?, ?, ?, ?)`, len(cardFaces), func(stmt *sql.Stmt, i int) (sql.Result, error) {
 		rec := cardFaces[i]
 
 		return stmt.Exec(
@@ -148,6 +144,7 @@ func importCardFaces(cardFaces []cardFace) error {
 			rec.ManaCost,
 			rec.Name,
 			rec.TypeLine,
+			rec.OracleText,
 		)
 	})
 

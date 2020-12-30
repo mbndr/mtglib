@@ -2,6 +2,7 @@ package filter
 
 import "strings"
 
+// ColorFilter filters for color identity of a card
 type ColorFilter struct {
 	Colors        []string
 	MonocolorOnly bool
@@ -13,7 +14,7 @@ func (f *ColorFilter) WhereClause() string {
 
 	if len(f.Colors) != 0 {
 		for range f.Colors {
-			whereClauses = append(whereClauses, "s.colors LIKE '%' || ? || '%'")
+			whereClauses = append(whereClauses, "s.color_identity LIKE '%' || ? || '%'")
 		}
 
 		whereStr = "(" + strings.Join(whereClauses, " OR ") + ")"
@@ -23,7 +24,7 @@ func (f *ColorFilter) WhereClause() string {
 		if whereStr != "" {
 			whereStr += " AND "
 		}
-		whereStr += "s.colors NOT LIKE '%|%'"
+		whereStr += "s.color_identity NOT LIKE '%|%'"
 	}
 
 	return whereStr

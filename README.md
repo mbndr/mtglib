@@ -17,9 +17,8 @@ $ ./mtglib -serve # run webserver
 ```
 
 ## TODO
-- Add detail view for multiface cards
+- Dark theme
 - Color filter: Multicolor only
 - Code (and comment) refactoring
 - Adding cards to collections (and export them to csv / json)
-- Use color-identity for filtering also?
 - When finished, provide release?

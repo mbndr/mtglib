@@ -54,7 +54,6 @@
 
 .ml-card-badge {
     position: absolute;
-    top: 20%;
     left: 0;
     padding: 0 8px 0 30px;
     font-size: 0.8em;
@@ -64,6 +63,15 @@
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     box-shadow: 3px 0 4px #333;
+}
+
+.ml-quantity {
+    top: 20%;
+}
+
+.ml-multiface {
+    top: 30%;
+    font-weight: bold;
 }
 
 .ml-symbol {
@@ -92,4 +100,6 @@
     border-radius: 8px;
     color: white;
     padding: 2px 10px;
+    box-sizing: border-box;
+    font-size: 0.7em;
 }
