@@ -86,3 +86,24 @@ body {
     height: 15px;
     width: auto;
 }
+
+.ml-rarity {
+    margin-right: 10px;
+    text-shadow: 0 0 1px #333;
+}
+
+.common {
+    color: black;
+}
+
+.uncommon {
+    color: #d4d4d4;
+}
+
+.rare {
+    color: #f0d853;
+}
+
+.mythic {
+    color: #d4743c;
+}

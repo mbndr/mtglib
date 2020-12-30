@@ -31,6 +31,7 @@ type card struct {
 	Set           string            `json:"set"`
 	SetName       string            `json:"set_name"`
 	CardFaces     []cardFace        `json:"card_faces"'`
+	Rarity        string            `json:"rarity"`
 }
 
 type cardFace struct {
@@ -99,8 +100,9 @@ func importFromBulk(bulkURI string) error {
 		colors,
 		color_identity,
 		set_code,
-		set_name
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
+		set_name,
+		rarity
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, len(records), func(stmt *sql.Stmt, i int) (sql.Result, error) {
 		rec := records[i]
 
 		for j := range rec.CardFaces {
@@ -121,6 +123,7 @@ func importFromBulk(bulkURI string) error {
 			colorsToString(rec.ColorIdentity),
 			rec.Set,
 			rec.SetName,
+			rec.Rarity,
 		)
 	})
 

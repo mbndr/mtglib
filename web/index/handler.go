@@ -106,6 +106,7 @@ func buildFilters(r *http.Request) []filter.Filter {
 	ruleText := r.URL.Query().Get("rule")
 	name := r.URL.Query().Get("name")
 	typ := r.URL.Query().Get("type")
+	rarity := r.URL.Query().Get("rarity")
 	colors := r.URL.Query()["colors"]
 	monocolorOnly := r.URL.Query().Get("monocolorOnly")
 
@@ -124,6 +125,12 @@ func buildFilters(r *http.Request) []filter.Filter {
 	if typ != "" {
 		filters = append(filters, &filter.TypeFilter{
 			Type: typ,
+		})
+	}
+
+	if rarity != "" {
+		filters = append(filters, &filter.RarityFilter{
+			Rarity: rarity,
 		})
 	}
 

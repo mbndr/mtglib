@@ -25,7 +25,6 @@ var (
 	serveAddr string
 )
 
-// TODO: panic when no helvault library imported
 func main() {
 	flag.BoolVar(&actionServe, "serve", false, "Start the webserver")
 	flag.StringVar(&serveAddr, "addr", ":8080", "Adress of the webserver")

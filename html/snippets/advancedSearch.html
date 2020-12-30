@@ -25,10 +25,27 @@
                 </div>
             </div>
         </div>
-        <!-- Rule text-->
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="ruleFilter" placeholder="+1/+1 counter" name="rule" value="{{ .QueryValue "rule" }}">
-            <label for="ruleFilter">Rule text</label>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Rule text-->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="ruleFilter" placeholder="+1/+1 counter" name="rule" value="{{ .QueryValue "rule" }}">
+                    <label for="ruleFilter">Rule text</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Rarity-->
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="rarityFilter" name="rarity" value="{{ .QueryValue "rarity" }}">
+                        <option {{ if .QueryValueIs "rarity" "" }}selected{{ end }} value>Choose a rarity</option>
+                        <option value="common" {{ if .QueryValueIs "rarity" "common" }}selected{{ end }}>Common</option>
+                        <option value="uncommon" {{ if .QueryValueIs "rarity" "uncommon" }}selected{{ end }}>Uncommon</option>
+                        <option value="rare" {{ if .QueryValueIs "rarity" "rare" }}selected{{ end }}>Rare</option>
+                        <option value="mythic" {{ if .QueryValueIs "rarity" "mythic" }}selected{{ end }}>Mythic</option>
+                    </select>
+                    <label for="rarityFilter">Rarity</label>
+                </div>
+            </div>
         </div>
         <!-- Colors-->
         <div class="row">

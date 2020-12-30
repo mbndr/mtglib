@@ -39,6 +39,13 @@
                 <td>{{ .Card.TypeLine }}</td>
             </tr>
             <tr>
+                <td>Rarity</td>
+                <td>
+                    <span class="ml-rarity {{ .Card.Rarity }}">●</span>
+                    {{ .Card.Rarity }}
+                </td>
+            </tr>
+            <tr>
                 <td colspan="2">
                     <div class="ml-oracle-text">
                         {{ .ParseOracleText .Card.OracleText }}

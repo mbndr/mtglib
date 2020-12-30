@@ -12,7 +12,6 @@ import (
 
 var LogSQL = false
 
-// TODO: add limit
 const baseSelect = `SELECT s.oracle_id FROM helvault_library h INNER JOIN scryfall_cards s ON s.scryfall_id = h.scryfall_id`
 
 type Filter interface {

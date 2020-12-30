@@ -25,7 +25,8 @@ const sqlStmtDistinctCards = `SELECT s.scryfall_id,
 								s.color_identity,
 								s.set_code,
 								s.set_name,
-								SUM(h.quantity)
+								SUM(h.quantity),
+								s.rarity
 							FROM helvault_library h
 								INNER JOIN scryfall_cards s
 								ON s.scryfall_id = h.scryfall_id
@@ -46,6 +47,7 @@ type Card struct {
 	SetCode       string
 	SetName       string
 	Quantity      int
+	Rarity        string
 	// When a card has multiple faces
 	CardFaces []CardFace
 }
@@ -100,6 +102,7 @@ func LoadCards() (*CardCollection, error) {
 			&c.SetCode,
 			&c.SetName,
 			&c.Quantity,
+			&c.Rarity,
 		)
 		if err == nil {
 			c.Colors = strings.Split(colorsStr, "|")

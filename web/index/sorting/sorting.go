@@ -12,8 +12,7 @@ func (s *Sorting) Validate() bool {
 		return false
 	}
 
-	// TODO: rarity?
-	if s.SortBy != "cmc" && s.SortBy != "type" && s.SortBy != "name" {
+	if s.SortBy != "cmc" && s.SortBy != "type" && s.SortBy != "name" && s.SortBy != "rarity" {
 		return false
 	}
 
@@ -30,6 +29,9 @@ func (s *Sorting) GetOrderBy() string {
 		sortBy = "s.type_line"
 	} else if s.SortBy == "name" {
 		sortBy = "s.name"
+	} else if s.SortBy == "rarity" {
+		// special ordering
+		sortBy = "CASE s.rarity WHEN 'common' THEN 0 WHEN 'uncommon' THEN 1 WHEN 'rare' THEN 2 WHEN 'mythic' THEN 3 END"
 	}
 
 	return sortBy + " " + s.SortOrder

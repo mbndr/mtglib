@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS scryfall_cards (
 	colors VARCHAR(255),
 	color_identity VARCHAR(255) NOT NULL,
 	set_code VARCHAR(10) NOT NULL,
-	set_name VARCHAR(255) NOT NULL
+	set_name VARCHAR(255) NOT NULL,
+	rarity VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS scryfall_card_faces (

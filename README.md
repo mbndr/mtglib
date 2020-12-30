@@ -17,7 +17,6 @@ $ ./mtglib -serve # run webserver
 ```
 
 ## TODO
-- Add rarity (card, filter, sorting)
 - Add detail view for multiface cards
 - Color filter: Multicolor only
 - Code (and comment) refactoring
