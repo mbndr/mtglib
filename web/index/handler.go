@@ -148,7 +148,10 @@ func buildFilters(r *http.Request) []filter.Filter {
 func buildSorting(r *http.Request) *sorting.Sorting {
 	s := sortingFromURL(r)
 	if s == nil || !s.Validate() {
-		return nil
+		return &sorting.Sorting{
+			SortBy:    "name",
+			SortOrder: "asc",
+		}
 	}
 	return s
 }
