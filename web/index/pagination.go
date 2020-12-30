@@ -9,7 +9,7 @@ import (
 
 const pageKey = "p"
 const ippKey = "ipp"
-const defaultIpp = 30
+const defaultIpp = 32
 const firstPage = 1
 
 type pagination struct {
@@ -48,12 +48,7 @@ func getIpp(r *http.Request) int {
 }
 
 func intInURLOrDefault(r *http.Request, key string, def int) int {
-	param, ok := r.URL.Query()[key]
-	if !ok {
-		return def
-	}
-
-	if p, err := strconv.Atoi(param[0]); err == nil {
+	if p, err := strconv.Atoi(r.URL.Query().Get(key)); err == nil {
 		return p
 	}
 	return def

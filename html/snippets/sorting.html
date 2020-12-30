@@ -1,0 +1,11 @@
+{{ define "sorting" }}
+    <div class="input-group">
+        <label for="sortBy" class="input-group-text">Sort by</label>
+        <select class="form-select form-select-sm" name="sort" onchange="this.form.submit();" id="sortBy">
+            <option {{ if not .Sorting }}selected{{ end }} value>Choose a sorting</option>
+            <option value="cmc" {{ if .SortingIs "cmc" }}selected{{ end }}>CMC</option>
+            <option value="type" {{ if .SortingIs "type" }}selected{{ end }}>Type</option>
+            <option value="name" {{ if .SortingIs "name" }}selected{{ end }}>Name</option>
+        </select>
+    </div> 
+{{ end }}

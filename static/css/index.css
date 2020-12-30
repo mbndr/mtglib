@@ -1,7 +1,3 @@
-.form-group {
-    
-}
-
 .ml-container {
     margin-top: 75px;
     margin-bottom: 20px;
@@ -60,13 +56,14 @@
     position: absolute;
     top: 20%;
     left: 0;
-    padding: 1px 8px 1px 30px;
+    padding: 0 8px 0 30px;
     font-size: 0.8em;
     background-color: #94b9a8;
     border: solid 1px #7da090;
     color: white;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
+    box-shadow: 3px 0 4px #333;
 }
 
 .ml-symbol {
@@ -82,8 +79,17 @@
     margin-bottom: 4px;
 }
 
-.ml-count-badge {
-    margin-bottom: 15px;
-    margin-top: 3px;
-    text-align: center;
+#ml-advanced-search {
+    padding: 10px;
+    background-color: #eeeeee;
+    border-radius: 5px;
+    border: 1px solid #d3d3d3;
+}
+
+.ml-info-badge {
+    background-color: #709eb9;
+    border: 1px solid #63869b;
+    border-radius: 8px;
+    color: white;
+    padding: 2px 10px;
 }

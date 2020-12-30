@@ -1,0 +1,28 @@
+{{ define "pagination" }}
+    {{ if .Pagination.IsNecessary }}
+        <nav aria-label="Navigation">
+            <ul class="pagination pagination-sm">
+                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
+                    <a class="page-link" href="{{ .Pagination.FirstPageURL }}">«</a>
+                </li>
+                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
+                    <a class="page-link" href="{{ .Pagination.PreviousPageURL }}">‹</a>
+                </li>
+                <li class="ml-pagination-item page-item">
+                    <select class="form-select" id="ml-pagination-select" onchange="location = this.value;">
+                        {{ range .Pagination.PageList }}
+                        <option value="{{ $.Pagination.PageURL . }}" {{ if eq $.Pagination.CurrentPage .}}selected{{ end }} >{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </li>
+                <li id="ml-pagination-next" class="ml-pagination-item page-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
+                    <a class="page-link" href="{{ .Pagination.NextPageURL }}">›</a>
+                </li>
+                <li class="page-item ml-pagination-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
+                    <a class="page-link" href="{{ .Pagination.LastPageURL }}">»</a>
+                </li>
+                
+            </ul>
+        </nav>
+    {{ end }}
+{{ end }}

@@ -10,6 +10,13 @@ import (
 	"github.com/mbndr/mtglib/web/index/sorting"
 )
 
+var templates = []string{
+	"html/index.html",
+	"html/snippets/pagination.html",
+	"html/snippets/sorting.html",
+	"html/snippets/advancedSearch.html",
+}
+
 // Handler wraps the data for the default http handler (only global data which does not change)
 type Handler struct {
 	cards             *mtglib.CardCollection
@@ -32,7 +39,7 @@ func NewHandler(cards *mtglib.CardCollection, symbols mtglib.SymbolCollection, t
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" && r.Method == "GET" {
 		var err error
-		h.tpl, err = template.ParseFiles("html/index.html")
+		h.tpl, err = template.ParseFiles(templates...)
 		if err != nil {
 			http.Error(w, "500 internal server error\n"+err.Error(), http.StatusInternalServerError)
 			return
@@ -44,7 +51,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "404 page not found", http.StatusNotFound)
 }
 
-// TODO: proper limit and offset
 func (h *Handler) serveHTML(w http.ResponseWriter, r *http.Request) {
 	p := newPagination(r)
 	s := buildSorting(r)
@@ -71,49 +77,60 @@ func (h *Handler) serveHTML(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.tpl.Execute(w, &indexVars{
-		request:        r,
-		Handler:        h,
-		ShownOracleIDs: resultOracleIDs[offset:idRangeTo],
-		TotalResults:   len(resultOracleIDs),
-		SearchTerm:     r.FormValue("search"),
-		Pagination:     p,
-		Sorting:        s,
+		request:          r,
+		Handler:          h,
+		ShownOracleIDs:   resultOracleIDs[offset:idRangeTo],
+		TotalResults:     len(resultOracleIDs),
+		SearchTerm:       r.FormValue("search"),
+		Pagination:       p,
+		Sorting:          s,
+		IsAdvancedSearch: len(f) != 0,
 	})
 }
 
-// TODO: shorter (custom constructors with request?)
+// uses the request to build filters
 func buildFilters(r *http.Request) []filter.Filter {
 	var filters []filter.Filter
 
-	if r.FormValue("search") != "" {
+	// Quick name search
+	quickSearch := r.URL.Query().Get("search")
+
+	if quickSearch != "" {
 		filters = append(filters, &filter.NameFilter{
-			Name: r.FormValue("search"),
+			Name: quickSearch,
 		})
-		return filters // this is quick search
+		return filters
 	}
 
-	if r.FormValue("rule") != "" {
+	// Advances search filters
+	ruleText := r.URL.Query().Get("rule")
+	name := r.URL.Query().Get("name")
+	typ := r.URL.Query().Get("type")
+	colors := r.URL.Query()["colors"]
+	monocolorOnly := r.URL.Query().Get("monocolorOnly")
+
+	if ruleText != "" {
 		filters = append(filters, &filter.RuleFilter{
-			Text: r.FormValue("rule"),
+			Text: ruleText,
 		})
 	}
 
-	if r.FormValue("name") != "" {
+	if name != "" {
 		filters = append(filters, &filter.NameFilter{
-			Name: r.FormValue("name"),
+			Name: name,
 		})
 	}
 
-	if r.FormValue("type") != "" {
+	if typ != "" {
 		filters = append(filters, &filter.TypeFilter{
-			Type: r.FormValue("type"),
+			Type: typ,
 		})
 	}
 
-	if len(r.URL.Query()["colors"]) != 0 || r.FormValue("monocolorOnly") == "1" {
+	if len(colors) != 0 || monocolorOnly == "1" {
 		filters = append(filters, &filter.ColorFilter{
-			Colors:        r.URL.Query()["colors"],
-			MonocolorOnly: r.FormValue("monocolorOnly") == "1",
+			Colors:        colors,
+			MonocolorOnly: monocolorOnly == "1",
 		})
 	}
 
@@ -130,18 +147,18 @@ func buildSorting(r *http.Request) *sorting.Sorting {
 }
 
 func sortingFromURL(r *http.Request) *sorting.Sorting {
-	sortBy, ok := r.URL.Query()["sort"]
-	if !ok {
+	sortBy := r.URL.Query().Get("sort")
+	if sortBy == "" {
 		return nil
 	}
 
-	sortOrder, ok := r.URL.Query()["order"]
-	if !ok {
-		sortOrder = []string{"asc"}
+	sortOrder := r.URL.Query().Get("order")
+	if sortOrder == "" {
+		sortOrder = "asc"
 	}
 
 	return &sorting.Sorting{
-		SortBy:    sortBy[0],
-		SortOrder: sortOrder[0],
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
 	}
 }

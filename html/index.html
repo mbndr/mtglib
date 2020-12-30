@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>mtglib</title>
     <link rel="stylesheet" href="/static/css/index.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
@@ -21,122 +21,21 @@
     </nav>
 
     <div class="container-fluid ml-container">
-        <form action="" method="get" class="form-inline">
-            
+        <form action="" method="get" class="form-inline" id="ml-filter-form">
             <div class="row" id="ml-filter-bar">
-                <div class="col-md-4">
-                    {{ if .Pagination.IsNecessary }}
-                        <nav aria-label="Navigation">
-                            <ul class="pagination pagination-sm">
-                                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
-                                    <a class="page-link" href="{{ .Pagination.FirstPageURL }}">«</a>
-                                </li>
-                                <li class="ml-pagination-item page-item {{ if .Pagination.IsFirstPage }}disabled{{ end }}">
-                                    <a class="page-link" href="{{ .Pagination.PreviousPageURL }}">‹</a>
-                                </li>
-                                <li class="ml-pagination-item page-item">
-                                    <select class="form-select" id="ml-pagination-select" onchange="location = this.value;">
-                                        {{ range .Pagination.PageList }}
-                                        <option value="{{ $.Pagination.PageURL . }}" {{ if eq $.Pagination.CurrentPage .}}selected{{ end }} >{{ . }}</option>
-                                        {{ end }}
-                                    </select>
-                                </li>
-                                <li id="ml-pagination-next" class="ml-pagination-item page-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
-                                    <a class="page-link" href="{{ .Pagination.NextPageURL }}">›</a>
-                                </li>
-                                <li class="page-item ml-pagination-item {{ if .Pagination.IsLastPage }}disabled{{ end }}">
-                                    <a class="page-link" href="{{ .Pagination.LastPageURL }}">»</a>
-                                </li>
-                                
-                            </ul>
-                        </nav>
-                    {{ end }}
-                </div>
-                <div class="col-md-2" style="">
-                    <div class="ml-count-badge">{{ .TotalResults }} / {{ .Handler.DistinctCardCount }}</div>
+                <div class="col-md-6">
+                    {{ template "pagination" . }}
                 </div>
                 <div class="col-md-3" style="margin-bottom: 15px;">
-                    <select class="form-select form-select-sm" name="sort" onchange="this.form.submit();">
-                        <option {{ if not .Sorting }}selected{{ end }} value>Choose a sorting</option>
-                        <option value="cmc" {{ if .SortingIs "cmc" }}selected{{ end }}>CMC</option>
-                        <option value="type" {{ if .SortingIs "type" }}selected{{ end }}>Type</option>
-                        <option value="name" {{ if .SortingIs "name" }}selected{{ end }}>Name</option>
-                    </select>
+                    {{ template "sorting" .}}
                 </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-sm ml-btn" data-bs-target="#advancedSearch" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="advancedSearch">Advanced search</button>
+                <div class="col-md-3 mb-3">
+                    <button type="button" class="btn ml-btn" data-bs-target="#advancedSearch" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="advancedSearch">
+                        Advanced search <span id="ml-toggle-as-symbol">●</span>
+                    </button>
                 </div>
                 <div class="col-md-12 collapse {{ if .QueryValueIs "as" "1" }}show{{ end }}" id="advancedSearch">
-                    <hr>
-                    <!-- Card name-->
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="nameFilter" placeholder="Archangel of Thune" name="name" value="{{ .QueryValue "name" }}">
-                        <label for="nameFilter">Card name</label>
-                    </div>
-                    <!-- Rule text-->
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="ruleFilter" placeholder="+1/+1 counter" name="rule" value="{{ .QueryValue "rule" }}">
-                        <label for="ruleFilter">Rule text</label>
-                    </div>
-                    <!-- Type-->
-                    <div class="form-floating mb-3">
-                        <select class="form-select" id="typeFilter" name="type" value="{{ .QueryValue "type" }}">
-                            <option {{ if .QueryValueIs "type" "" }}selected{{ end }} value>Choose a type</option>
-                            <option value="land" {{ if .QueryValueIs "type" "land" }}selected{{ end }}>Land</option>
-                            <option value="creature" {{ if .QueryValueIs "type" "creature" }}selected{{ end }}>Creature</option>
-                            <option value="artifact" {{ if .QueryValueIs "type" "artifact" }}selected{{ end }}>Artifact</option>
-                            <option value="enchantment" {{ if .QueryValueIs "type" "enchantment" }}selected{{ end }}>Enchantment</option>
-                            <option value="planeswalker" {{ if .QueryValueIs "type" "planeswalker" }}selected{{ end }}>Planeswalker</option>
-                            <option value="instant" {{ if .QueryValueIs "type" "instant" }}selected{{ end }}>Instant</option>
-                            <option value="sorcery" {{ if .QueryValueIs "type" "sorcery" }}selected{{ end }}>Sorcery</option>
-                        </select>
-                        <label for="typeFilter">Type</label>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-10">
-                            <div class="row">
-                                <label class="form-label ms-3 mb-3">Colors</label>
-                                <div class="col-md-6">
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="R" id="colorRed" {{ if .QueryValueContains "colors" "R" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorRed">{{ .ManaSymbol 'R' }}</label>
-                                    </div>
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="G" id="colorGreen" {{ if .QueryValueContains "colors" "G" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorGreen">{{ .ManaSymbol 'G' }}</label>
-                                    </div>
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="U" id="colorBlue" {{ if .QueryValueContains "colors" "U" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorBlue">{{ .ManaSymbol 'U' }}</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="W" id="colorWhite" {{ if .QueryValueContains "colors" "W" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorWhite">{{ .ManaSymbol 'W' }}</label>
-                                    </div>
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="B" id="colorBlack" {{ if .QueryValueContains "colors" "B" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorBlack">{{ .ManaSymbol 'B' }}</label>
-                                    </div>
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="colors" value="C" id="colorLess" {{ if .QueryValueContains "colors" "C" }}checked{{ end }}>
-                                        <label class="form-check-label" for="colorLess">{{ .ManaSymbol 'C' }}</label>
-                                    </div>
-                                    <div class="form-check form-switch ml-filter-cb">
-                                        <input class="form-check-input" type="checkbox" name="monocolorOnly" value="1" id="monocolorOnly" {{ if .QueryValueContains "monocolorOnly" "1" }}checked{{ end }}>
-                                        <label class="form-check-label" for="monocolorOnly">Monocolor only</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2 mt-3">
-                            <div class="d-grid">
-                                <button type="submit" name="as" value="1" class="btn btn-sm ml-btn">Search</button>
-                            </div>
-                        </div>
-                    </div>
+                    {{ template "advancedSearch" . }}
                 </div>
             </div>
             
@@ -159,10 +58,42 @@
                 </div>
             {{ end }}
         </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <p class="ml-info-badge mb-1">{{ .Handler.TotalCardCount }} cards total</p>
+                <p class="ml-info-badge mb-1">{{ .Handler.DistinctCardCount }} distinct cards</p>
+                <p class="ml-info-badge mb-1">{{ .TotalResults }} results total</p>
+            </div>
+            <div class="col-6">
+                {{ template "pagination" . }}
+            </div>
+        </div>
         
     </div>
 
     <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateASTB() {
+            let asToggleButton = document.getElementById("ml-toggle-as-symbol")
+            let as = document.getElementById("advancedSearch");
+
+            if (as.classList.contains("show")) {
+                asToggleButton.innerText = "▲";
+            } else {
+                asToggleButton.innerText = "▼";
+            }           
+        }
+
+        window.onload = function() {
+            updateASTB();
+
+            document.getElementById("advancedSearch").addEventListener("shown.bs.collapse", updateASTB);
+            document.getElementById("advancedSearch").addEventListener("hidden.bs.collapse", updateASTB);
+        }
+    </script>
 
 </body>
 </html>

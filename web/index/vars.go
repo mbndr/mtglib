@@ -11,14 +11,14 @@ import (
 
 // indexVars changes for each request and is given to the template.
 type indexVars struct {
-	request        *http.Request
-	Handler        *Handler
-	ShownOracleIDs []string
-	TotalResults   int
-	SearchTerm     string
-	Pagination     pagination
-	Sorting        *sorting.Sorting
-	// TODO: filters (and get rid of SearchTerm then?)
+	request          *http.Request
+	Handler          *Handler
+	ShownOracleIDs   []string
+	TotalResults     int
+	SearchTerm       string
+	Pagination       pagination
+	Sorting          *sorting.Sorting
+	IsAdvancedSearch bool
 }
 
 // GetCard returns a Card object for an oracleID.

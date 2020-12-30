@@ -1,11 +1,12 @@
 package sorting
 
-// Sorting could be done like the filters, but they are more complex
+// Sorting could be done like the filters, but they are much simpler, therefore only one struct
 type Sorting struct {
 	SortBy    string
 	SortOrder string
 }
 
+// Validate if the sorting values are valid
 func (s *Sorting) Validate() bool {
 	if s.SortOrder != "asc" && s.SortOrder != "desc" {
 		return false

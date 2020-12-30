@@ -18,5 +18,9 @@ $ ./mtglib -serve # run webserver
 
 ## TODO
 - Add rarity (card, filter, sorting)
-- Add config for sort order
 - Add detail view for multiface cards
+- Color filter: Multicolor only
+- Code (and comment) refactoring
+- Adding cards to collections (and export them to csv / json)
+- Use color-identity for filtering also?
+- When finished, provide release?

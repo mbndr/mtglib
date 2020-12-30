@@ -1,0 +1,89 @@
+{{ define "advancedSearch" }}
+    <div id="ml-advanced-search">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Card name-->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="nameFilter" placeholder="Archangel of Thune" name="name" value="{{ .QueryValue "name" }}">
+                    <label for="nameFilter">Card name</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Type-->
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="typeFilter" name="type" value="{{ .QueryValue "type" }}">
+                        <option {{ if .QueryValueIs "type" "" }}selected{{ end }} value>Choose a type</option>
+                        <option value="land" {{ if .QueryValueIs "type" "land" }}selected{{ end }}>Land</option>
+                        <option value="creature" {{ if .QueryValueIs "type" "creature" }}selected{{ end }}>Creature</option>
+                        <option value="artifact" {{ if .QueryValueIs "type" "artifact" }}selected{{ end }}>Artifact</option>
+                        <option value="enchantment" {{ if .QueryValueIs "type" "enchantment" }}selected{{ end }}>Enchantment</option>
+                        <option value="planeswalker" {{ if .QueryValueIs "type" "planeswalker" }}selected{{ end }}>Planeswalker</option>
+                        <option value="instant" {{ if .QueryValueIs "type" "instant" }}selected{{ end }}>Instant</option>
+                        <option value="sorcery" {{ if .QueryValueIs "type" "sorcery" }}selected{{ end }}>Sorcery</option>
+                    </select>
+                    <label for="typeFilter">Type</label>
+                </div>
+            </div>
+        </div>
+        <!-- Rule text-->
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="ruleFilter" placeholder="+1/+1 counter" name="rule" value="{{ .QueryValue "rule" }}">
+            <label for="ruleFilter">Rule text</label>
+        </div>
+        <!-- Colors-->
+        <div class="row">
+            <div class="col-md-10">
+                <div class="row">
+                    <label class="form-label ms-3 mb-3">Colors</label>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="R" id="colorRed" {{ if .QueryValueContains "colors" "R" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorRed">{{ .ManaSymbol 'R' }}</label>
+                        </div>
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="G" id="colorGreen" {{ if .QueryValueContains "colors" "G" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorGreen">{{ .ManaSymbol 'G' }}</label>
+                        </div>
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="U" id="colorBlue" {{ if .QueryValueContains "colors" "U" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorBlue">{{ .ManaSymbol 'U' }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="W" id="colorWhite" {{ if .QueryValueContains "colors" "W" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorWhite">{{ .ManaSymbol 'W' }}</label>
+                        </div>
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="B" id="colorBlack" {{ if .QueryValueContains "colors" "B" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorBlack">{{ .ManaSymbol 'B' }}</label>
+                        </div>
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="colors" value="C" id="colorLess" {{ if .QueryValueContains "colors" "C" }}checked{{ end }}>
+                            <label class="form-check-label" for="colorLess">{{ .ManaSymbol 'C' }}</label>
+                        </div>
+                        <div class="form-check form-switch ml-filter-cb">
+                            <input class="form-check-input" type="checkbox" name="monocolorOnly" value="1" id="monocolorOnly" {{ if .QueryValueContains "monocolorOnly" "1" }}checked{{ end }}>
+                            <label class="form-check-label" for="monocolorOnly">Monocolor only</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mt-3">
+                <div class="d-grid">
+                    <div class="input-group mb-3">
+                        <label for="sortOrder" class="input-group-text">Sort order</label>
+                        <select class="form-select form-select-sm" name="order" id="sortOrder">
+                            <option value="asc">ASC</option>
+                            <option value="desc" {{ if .QueryValueIs "order" "desc" }}selected{{ end }}>DESC</option>
+                        </select>
+                    </div>
+                    {{ if .IsAdvancedSearch}} {{/* needed when sorting after advanced search */}}
+                        <input type="hidden" name="as" value="1">
+                    {{ end }}
+                    <button type="submit" name="as" value="1" class="btn ml-btn">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}
