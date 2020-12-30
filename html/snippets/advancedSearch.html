@@ -32,7 +32,7 @@
         </div>
         <!-- Colors-->
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-9">
                 <div class="row">
                     <label class="form-label ms-3 mb-3">Colors</label>
                     <div class="col-md-6">
@@ -69,7 +69,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 mt-3">
+            <div class="col-md-3 mt-3">
                 <div class="d-grid">
                     <div class="input-group mb-3">
                         <label for="sortOrder" class="input-group-text">Sort order</label>
@@ -78,6 +78,17 @@
                             <option value="desc" {{ if .QueryValueIs "order" "desc" }}selected{{ end }}>DESC</option>
                         </select>
                     </div>
+                    <div class="input-group mb-3">
+                        <label for="ipp" class="input-group-text">Items per page</label>
+                        <select class="form-select form-select-sm" name="ipp" id="ipp">
+                            <option {{ if .QueryValueIs "ipp" "" }}selected{{ end }} value>System default</option>
+                            <option value="10" {{ if .QueryValueIs "ipp" "10" }}selected{{ end }}>10</option>
+                            <option value="20" {{ if .QueryValueIs "ipp" "20" }}selected{{ end }}>20</option>
+                            <option value="30" {{ if .QueryValueIs "ipp" "30" }}selected{{ end }}>30</option>
+                            <option value="40" {{ if .QueryValueIs "ipp" "40" }}selected{{ end }}>40</option>
+                        </select>
+                    </div>
+
                     {{ if .IsAdvancedSearch}} {{/* needed when sorting after advanced search */}}
                         <input type="hidden" name="as" value="1">
                     {{ end }}
